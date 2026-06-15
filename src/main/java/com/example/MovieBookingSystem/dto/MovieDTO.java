@@ -1,37 +1,28 @@
-package com.example.MovieBookingSystem.entity;
-
+package com.example.MovieBookingSystem.dto;
 import jakarta.persistence.*;
 
 import java.sql.Date;
 
-@Entity
-@Table(name = "movie")
-public class Movie {
+public class MovieDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "duration")
     private int duration;
 
-    @Column(name = "release_date")
     private Date releaseDate;
 
-    @Column(name = "is_showing")
     private boolean isShowing;
 
-    public Movie(String name, int duration, Date releaseDate, boolean isShowing) {
+    public MovieDTO(String name, int duration, Date releaseDate, boolean isShowing) {
         this.name = name;
         this.duration = duration;
         this.releaseDate = releaseDate;
         this.isShowing = isShowing;
     }
 
-    public Movie() {
+    public MovieDTO() {
     }
 
     public Long getId() {
@@ -66,17 +57,13 @@ public class Movie {
         this.releaseDate = releaseDate;
     }
 
-    public boolean getIsShowing() {
+    public boolean isShowing() {
         return isShowing;
     }
 
-    public void setIsShowing(boolean showing) {
+    public void setShowing(boolean showing) {
         isShowing = showing;
     }
 
-    @Override
-    public String toString() {
-        return "Movie{" + "id=" + id + ", name='" + name + '\'' + ", duration=" + duration + ", releaseDate=" + releaseDate + '}';
-    }
-
 }
+
