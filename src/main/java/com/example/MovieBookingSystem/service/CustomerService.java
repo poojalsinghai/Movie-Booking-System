@@ -1,12 +1,16 @@
 package com.example.MovieBookingSystem.service;
 
+import com.example.MovieBookingSystem.dto.MovieDTO;
 import com.example.MovieBookingSystem.dto.TheatreDTO;
+import com.example.MovieBookingSystem.entity.Movie;
+import com.example.MovieBookingSystem.mapper.MovieMapper;
 import com.example.MovieBookingSystem.mapper.TheatreMapper;
 import com.example.MovieBookingSystem.pojo.MovieShowPOJO;
 import com.example.MovieBookingSystem.pojo.ShowPOJO;
 import com.example.MovieBookingSystem.entity.PictureShow;
 import com.example.MovieBookingSystem.entity.Screen;
 import com.example.MovieBookingSystem.entity.Theatre;
+import com.example.MovieBookingSystem.repository.MovieRepository;
 import com.example.MovieBookingSystem.repository.PictureShowRepository;
 import com.example.MovieBookingSystem.repository.TheatreRepository;
 import org.springframework.stereotype.Service;
@@ -20,14 +24,16 @@ import java.util.*;
 public class CustomerService {
     private PictureShowRepository pictureShowRepository;
     private TheatreRepository theatreRepository;
+    private MovieRepository movieRepository;
 
-    public CustomerService(PictureShowRepository pictureShowRepository, TheatreRepository theatreRepository) {
+    public CustomerService(PictureShowRepository pictureShowRepository, TheatreRepository theatreRepository, MovieRepository movieRepository) {
         this.pictureShowRepository = pictureShowRepository;
         this.theatreRepository = theatreRepository;
+        this.movieRepository = movieRepository;
     }
 
     public List<MovieShowPOJO> getMovieShows(long movieId, String city) {
-        List<PictureShow> movieShows = pictureShowRepository.findByMovieIdAndCity(movieId, city);
+        List<PictureShow> movieShows = pictureShowRepository.findByMovieIdAndCity(movieId, city, LocalDateTime.now());
         HashMap<LocalDate, HashMap<Long, List<LocalTime>>> map1 = new HashMap<>();
 
         int n = movieShows.size();
@@ -81,5 +87,29 @@ public class CustomerService {
         Collections.sort(list, Comparator.comparing(MovieShowPOJO::getDate));
 
         return list;
+    }
+
+    public List<MovieDTO> getCurrentMovies() {
+        List<Movie> list = movieRepository.getCurrentMovies();
+        List<MovieDTO> result = new ArrayList<>();
+
+        for (Movie movie : list)
+        {
+            result.add(MovieMapper.mapToMovieDTO(movie));
+        }
+
+        return result;
+    }
+
+    public List<MovieDTO> getUpcomingMovies() {
+        List<Movie> list = movieRepository.getUpcomingMovies(LocalDateTime.now().toLocalDate());
+        List<MovieDTO> result = new ArrayList<>();
+
+        for (Movie movie : list)
+        {
+            result.add(MovieMapper.mapToMovieDTO(movie));
+        }
+        // System.out.println(list.size() + " " + result.size());
+        return result;
     }
 }
