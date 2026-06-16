@@ -58,7 +58,7 @@ public class ShowSeatMapping {
         this.seat = seat;
     }
 
-    public boolean isAvailable() {
+    public boolean getAvailable() {
         return available;
     }
 
