@@ -2,16 +2,16 @@ package com.example.MovieBookingSystem.service;
 
 import com.example.MovieBookingSystem.dto.MovieDTO;
 import com.example.MovieBookingSystem.dto.TheatreDTO;
-import com.example.MovieBookingSystem.entity.Movie;
+import com.example.MovieBookingSystem.entity.*;
 import com.example.MovieBookingSystem.mapper.MovieMapper;
 import com.example.MovieBookingSystem.mapper.TheatreMapper;
 import com.example.MovieBookingSystem.pojo.MovieShowPOJO;
+import com.example.MovieBookingSystem.pojo.SeatPOJO;
+import com.example.MovieBookingSystem.pojo.SeatTypePOJO;
 import com.example.MovieBookingSystem.pojo.ShowPOJO;
-import com.example.MovieBookingSystem.entity.PictureShow;
-import com.example.MovieBookingSystem.entity.Screen;
-import com.example.MovieBookingSystem.entity.Theatre;
 import com.example.MovieBookingSystem.repository.MovieRepository;
 import com.example.MovieBookingSystem.repository.PictureShowRepository;
+import com.example.MovieBookingSystem.repository.ShowSeatMappingRepository;
 import com.example.MovieBookingSystem.repository.TheatreRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,11 +25,13 @@ public class CustomerService {
     private PictureShowRepository pictureShowRepository;
     private TheatreRepository theatreRepository;
     private MovieRepository movieRepository;
+    private ShowSeatMappingRepository showSeatMappingRepository;
 
-    public CustomerService(PictureShowRepository pictureShowRepository, TheatreRepository theatreRepository, MovieRepository movieRepository) {
+    public CustomerService(PictureShowRepository pictureShowRepository, TheatreRepository theatreRepository, MovieRepository movieRepository, ShowSeatMappingRepository showSeatMappingRepository) {
         this.pictureShowRepository = pictureShowRepository;
         this.theatreRepository = theatreRepository;
         this.movieRepository = movieRepository;
+        this.showSeatMappingRepository = showSeatMappingRepository;
     }
 
     public List<MovieShowPOJO> getMovieShows(long movieId, String city) {
@@ -110,6 +112,40 @@ public class CustomerService {
             result.add(MovieMapper.mapToMovieDTO(movie));
         }
         // System.out.println(list.size() + " " + result.size());
+        return result;
+    }
+
+    public List<SeatTypePOJO> getShowSeats(Long pictureShowId) {
+        Optional<PictureShow> pictureShow = pictureShowRepository.findById(pictureShowId);
+        List<ShowSeatMapping> list = showSeatMappingRepository.getShowSeatMapping(pictureShow.get());
+
+        HashMap<Seat.Type, Double> prices = new HashMap<>();
+        HashMap<Seat.Type, List<SeatPOJO>> map = new HashMap<>();
+
+        int n = list.size();
+        for (int i = 0; i < n; i++)
+        {
+            Seat.Type seatType = list.get(i).getSeat().getType();
+            if (!map.containsKey(seatType))
+            {
+                map.put(seatType, new ArrayList<>());
+            }
+
+            map.get(seatType).add(new SeatPOJO(list.get(i).getSeat().getSeatNo(), list.get(i).getAvailable()));
+
+            if (!prices.containsKey(seatType))
+            {
+                prices.put(seatType, list.get(i).getPrice());
+            }
+        }
+
+        List<SeatTypePOJO> result = new ArrayList<>();
+        for (Map.Entry<Seat.Type, List<SeatPOJO>> entry : map.entrySet())
+        {
+            SeatTypePOJO seatTypePOJO = new SeatTypePOJO(entry.getKey(), prices.get(entry.getKey()), entry.getValue());
+            result.add(seatTypePOJO);
+        }
+
         return result;
     }
 }
